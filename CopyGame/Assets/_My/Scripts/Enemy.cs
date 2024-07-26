@@ -12,12 +12,15 @@ public class Enemy : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
+
     public void EnemyOnClick()
     {
         anim.SetTrigger("Hit");
+    }
+    public void EnemyDie()
+    {
+        Destroy(gameObject);
+        Debug.Log("Die!");
     }
 }
