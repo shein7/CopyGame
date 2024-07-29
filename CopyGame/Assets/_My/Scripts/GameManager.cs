@@ -4,6 +4,7 @@ using System.IO;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -17,9 +18,17 @@ public class GameManager : MonoBehaviour
     private AudioSource audioSource;
 
     [Header("Enemy")]
-    public GameObject enemyObj;
+    public GameObject[] enemyObjs;
     public GameObject enemySpawn;
     private bool isSpawn = true;
+
+
+    [Header("UI")]
+    public Image imageEnemyHP;
+    public Text textGold;
+    public Text textPayGold;
+    public Text textStageCount;
+    public Text textEnemyCount;
 
     private bool isAttack = false;
     private float attackTime = 0f;
@@ -32,6 +41,11 @@ public class GameManager : MonoBehaviour
         playerAnim = player.GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
         setting = GetComponent<Settings>();
+
+        textGold.text = setting.stringGold();
+        textPayGold.text = setting.stringPayGold();
+        textStageCount.text = setting.stage.ToString();
+        textEnemyCount.text = setting.enemyCount.ToString();
     }
 
     // Update is called once per frame
@@ -39,6 +53,7 @@ public class GameManager : MonoBehaviour
     {
         EnemySpawn();
         MouseOnClick();
+        ShowEnemyHP();
     }
     private bool IsAttackChk()
 
@@ -77,6 +92,9 @@ public class GameManager : MonoBehaviour
             {
                 enemy.EnemyDie();
                 setting.GetEnemyHP();
+                setting.GetGold();
+                textGold.text = setting.stringGold();
+                
                 isSpawn = true;
             }
         }
@@ -110,7 +128,34 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
 
-        setting.InitEnemyHP();
-        Instantiate(enemyObj,enemySpawn.transform.position,Quaternion.identity);
+        setting.enemyCount -= 1;
+        if(setting.enemyCount <= 0)
+        {
+            setting.stage += 1;
+            textStageCount.text = setting.stage.ToString();
+            setting.enemyCount = 6;
+            setting.InitEnemyHP();
+        }
+        textEnemyCount.text = setting.enemyCount.ToString();
+        int ran = Random.Range(0,2);
+        Instantiate(enemyObjs[ran],enemySpawn.transform.position,Quaternion.identity);
+    }
+
+    private void ShowEnemyHP()
+    {
+        imageEnemyHP.fillAmount = setting.GetEnemyHPVal();
+    }
+
+    public void BtnLvUp()
+    {
+        setting.LvUpPatGold();
+        textGold.text = setting.stringGold();
+        textPayGold.text = setting.stringPayGold();
+
+    }
+    public void SumGold()
+    {
+        setting.SumGold();
+        textGold.text = setting.stringGold();
     }
 }
